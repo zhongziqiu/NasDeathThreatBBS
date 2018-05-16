@@ -2,50 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>星云链Dapp</title>
-</head>
-<body>
-    <div>
-        <h1>发布信息</h1>
-        <div>标题：</div>
-        <div><input type="text" id="title" style="width:370px"/></div>
-        <div>内容：</div>
-        <div><textarea cols="50" rows="10" id="content"></textarea></div>
-        <div><input type="button" value="发布" id="publish"></div>
-    </div>
-
-    <div>
-        <h1>执行结果：</h1>
-        <div>
-            <textarea cols="100" rows="5" id="result"></textarea>
-        </div>
-    </div>
-
-    <br/>
-    <hr/>
-
-    <div>
-        <h1>查询信息：</h1>
-        <div>作者地址：</div>
-        <div>
-            <input type="text" id="author" style="width:370px"/>&nbsp;<input type="button" id="search" value="查询" />
-        </div>
-        <div>信息：</div>
-        <div id="queryResult" style="height:100px;width:370px;border:1px solid #aaa">
-
-        </div>
-    </div>
-
-    <div style="height:50px"></div>
-
-    <script src="libs/jquery-3.3.1.min.js"></script>
+    <title>死亡威胁留言板</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="libs/jquery-2.1.1.min.js"></script>
+    <script src="libs/bootstrap-3.3.7.min.js"></script>
     <script src="libs/nebulas.js"></script>
     <script src="libs/nebPay.js"></script>
     <script>
         "use strict";
 
         // 合约地址
-        var dappAddress = "n1fie4QU3uXFycB1bo2VtwX1fifSLow7Vm9";
+        var dappAddress = "n1hzmftRVWy8oQPep9sjsGCirN6zsEWuCUZ";
 
         // 直接访问星云链的api
         var nebulas = require("nebulas"),
@@ -62,36 +29,49 @@
         // 执行合约返回的交易流水号，用于查询交易信息
         var serialNumber;
 
-        $("#publish").click(function () {
-            var title = $("#title").val().trim();
-            var content = $("#content").val().trim();
+        $(function() {
+            $("#publish").click(function () {
+                var name = $("#name").val().trim();
+                var minutes =  $("#minutes").val().trim();
+                var currentTime = new Date().getTime();
+                var timestamp = currentTime + minutes * 60 * 1000;
+                var content = $("#content").val().trim();
 
-            if (title === "" || content === "") {
-                alert("标题或内容不能为空！");
-                return;
-            }
-
-            // 执行合约中的save方法
-            serialNumber = nebPay.call(dappAddress, "0", "save", "[\"" + title + "\",\"" + content + "\"]", {
-                listener : function (resp) {
-                    console.log(resp);
-                    // 清空信息
-                    $("#title").val("");
-                    $("#content").val("");
-
-                    // 延迟5秒执行
-                    intervalQuery = setInterval(function () {
-                        queryResultInfo();
-                    }, 5000);
+                if (name === "" || minutes === "") {
+                    alert("‘名称’或‘倒计时分钟’不能为空！");
+                    return;
                 }
+
+                console.log("Ready to call the save function !!!");
+                // 执行合约中的save方法
+                serialNumber = nebPay.call(dappAddress, "0", "save", "[\"" + name + "\",\"" + timestamp + "\",\"" + content + "\"]", {
+                    listener : function (resp) {
+                        console.log(resp);
+                        // 清空信息
+                        $("#name").val("");
+                        $("#minutes").val("");
+                        $("#content").val("");
+
+                        // 延迟5秒执行
+                        intervalQuery = setInterval(function () {
+                            queryResultInfo();
+                        }, 5000);
+                    }
+                });
+
+                console.log("serialNumber is" + serialNumber);
             });
         });
+
         // 定时器
         var intervalQuery;
+        var intervalQuery2;
+
         // 根据交易流水号查询执行结果数据
         function queryResultInfo() {
             nebPay.queryPayInfo(serialNumber)
                 .then(function (resp) {
+                   console.log("resp is " + resp);
                     $("#result").val(resp);
                     var respObject = JSON.parse(resp)
                     if(respObject.code === 0){
@@ -104,21 +84,21 @@
                 })
         }
 
-        // 查看信息
-        $("#search").click(function () {
-            var author = $("#author").val().trim();
-            if (author === "") {
-                alert("作者地址不能为空！");
-                return;
-            }
+        // 延迟5秒执行
+        //intervalQuery2 = setInterval(function () {
+        //    queryOutDateMessages();
+        //}, 60000);
 
+        // 根据交易流水号查询执行结果数据
+        //function queryOutDateMessages() {
+        $("#test").click(function () {
             var from = Account.NewAccount().getAddressString();
             var value = "0";   // 金额
             var nonce = "0";   // 交易序号
             var gas_price = "1000000" // 手续费价格
             var gas_limit = "2000000" // 手续费限制
-            var callFunction = "read";
-            var callArgs = "[\"" + author + "\"]"; //in the form of ["args"]
+            var callFunction = "readOutOfDateMessage";
+            var callArgs = "[100, 0]"; //in the form of ["args"]
             var contract = { // 合约
                 "function": callFunction,  // 方法名
                 "args": callArgs            // 参数
@@ -127,18 +107,69 @@
             // 使用api.call执行合约中的方法
             neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
                 var ressultObj = JSON.parse(resp.result);
-                $("#result").val(resp.result);
 
-                var title = ressultObj.title;
-                var content = ressultObj.content;
-                var time = new Date(ressultObj.timestamp);
-
-                $("#queryResult").html("标题：" + title + "<br/>" + "内容：" + content + "<br/>" + "时间：" + time);
-
+                for (var i = 0; i < ressultObj.length; i++){
+                    var name = ressultObj.name;
+                    var content = ressultObj.content;
+                    var outDateTime = new Date(ressultObj.timestamp);
+                    $("#queryResult").html("姓名：" + name + "<br/>" + "死亡威胁留言：" + content + "<br/>" + "过期时间：" + outDateTime);
+                }
             }).catch(function (err) {
-                console.log("error:" + err.message)
+                console.log("error:" + err.message);
             })
         });
+
     </script>
+</head>
+<body style="margin:30px">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <h1 class="col-md-2 col-md-offset-2">死亡威胁留言板</h1>
+        </div>
+
+        <div class="form-group">
+            <label for="name" class="col-xs-2">姓名：</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="name"
+                    placeholder="请输入姓名">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="timestamp" class="col-xs-2">倒计时时间（分钟）：</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="minutes"
+                    placeholder="请输入时间（分钟）">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="content" class="col-xs-2">留言内容：</label>
+            <div class="col-xs-4">
+                <textarea class="form-control" rows="5" id="content"
+                   placeholder="续时请置空"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="content" class="col-xs-2">执行结果：</label>
+            <div class="col-xs-4">
+                <textarea class="form-control" rows="5" id="result"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-default" id="publish">
+                发布</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-default" id="test">
+                测试</button>
+            </div>
+        </div>
+
+        <div id="queryResult" style="height:200px;width:800px;border:1px solid #aaa">
+    </form>
 </body>
 </html>
