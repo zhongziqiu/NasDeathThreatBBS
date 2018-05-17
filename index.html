@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>死亡威胁留言板</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
     <script src="libs/jquery-2.1.1.min.js"></script>
     <script src="libs/bootstrap-3.3.7.min.js"></script>
     <script src="libs/nebulas.js"></script>
@@ -12,7 +13,7 @@
         "use strict";
 
         // 合约地址
-        var dappAddress = "n1hzmftRVWy8oQPep9sjsGCirN6zsEWuCUZ";
+        var dappAddress = "n1sfa8wovy3PJocPVhA39gqM8KeDp24P643";
 
         // 直接访问星云链的api
         var nebulas = require("nebulas"),
@@ -26,47 +27,25 @@
         var NebPay = require("nebpay");
         var nebPay = new NebPay();
 
+	    if (typeof(webExtensionWallet) === "undefined") {
+	        $("#content_div").hide();
+	        alert("请安装星云链webExtensionWallet插件，https://github.com/ChengOrangeJu/WebExtensionWallet");
+	    } else {
+	        $("#content_div").show();
+	    }
+
         // 执行合约返回的交易流水号，用于查询交易信息
         var serialNumber;
-
-        $(function() {
-            $("#publish").click(function () {
-                var name = $("#name").val().trim();
-                var minutes =  $("#minutes").val().trim();
-                var currentTime = new Date().getTime();
-                var timestamp = currentTime + minutes * 60 * 1000;
-                var content = $("#content").val().trim();
-
-                if (name === "" || minutes === "") {
-                    alert("‘名称’或‘倒计时分钟’不能为空！");
-                    return;
-                }
-
-                console.log("Ready to call the save function !!!");
-                // 执行合约中的save方法
-                serialNumber = nebPay.call(dappAddress, "0", "save", "[\"" + name + "\",\"" + timestamp + "\",\"" + content + "\"]", {
-                    listener : function (resp) {
-                        console.log(resp);
-                        // 清空信息
-                        $("#name").val("");
-                        $("#minutes").val("");
-                        $("#content").val("");
-
-                        // 延迟5秒执行
-                        intervalQuery = setInterval(function () {
-                            queryResultInfo();
-                        }, 5000);
-                    }
-                });
-
-                console.log("serialNumber is" + serialNumber);
-            });
-        });
-
         // 定时器
         var intervalQuery;
         var intervalQuery2;
 
+
+		//<div class="form-group">
+        //    <label for="content">执行结果：</label>
+        //    <textarea class="form-control" rows="5" id="result"></textarea>
+        //</div>
+        
         // 根据交易流水号查询执行结果数据
         function queryResultInfo() {
             nebPay.queryPayInfo(serialNumber)
@@ -84,92 +63,147 @@
                 })
         }
 
-        // 延迟5秒执行
-        //intervalQuery2 = setInterval(function () {
-        //    queryOutDateMessages();
-        //}, 60000);
+        $(function() {
+            $("#publish").click(function () {
+                var name = $("#name").val().trim();
+                var minutes =  $("#minutes").val().trim();
+                var currentTime = new Date().getTime();
+                var timestamp = currentTime + minutes * 60 * 1000;
+                var content = $("#content").val().trim();
 
-        // 根据交易流水号查询执行结果数据
-        //function queryOutDateMessages() {
-        $("#test").click(function () {
-            var from = Account.NewAccount().getAddressString();
-            var value = "0";   // 金额
-            var nonce = "0";   // 交易序号
-            var gas_price = "1000000" // 手续费价格
-            var gas_limit = "2000000" // 手续费限制
-            var callFunction = "readOutOfDateMessage";
-            var callArgs = "[100, 0]"; //in the form of ["args"]
-            var contract = { // 合约
-                "function": callFunction,  // 方法名
-                "args": callArgs            // 参数
-            }
-
-            // 使用api.call执行合约中的方法
-            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
-                var ressultObj = JSON.parse(resp.result);
-
-                for (var i = 0; i < ressultObj.length; i++){
-                    var name = ressultObj.name;
-                    var content = ressultObj.content;
-                    var outDateTime = new Date(ressultObj.timestamp);
-                    $("#queryResult").html("姓名：" + name + "<br/>" + "死亡威胁留言：" + content + "<br/>" + "过期时间：" + outDateTime);
+                if (name === "" || minutes === "") {
+                    alert("‘名称’或‘倒计时分钟’不能为空！");
+                    return;
                 }
-            }).catch(function (err) {
-                console.log("error:" + err.message);
-            })
+
+		        var to = dappAddress;
+		        var value = "0";
+		        var callFunction = "save";
+		        var callArgs = "[\"" + name + "\",\"" + content + "\",\"" + timestamp + "\"]";
+ 
+                // 执行合约中的save方法
+				console.log("Ready to call the save function !!!");
+                serialNumber = nebPay.call(to, value, callFunction, callArgs, {
+                    listener : function (resp) {
+                        console.log("resp is " + JSON.stringify(resp));
+                        // 清空信息
+                        $("#name").val("");
+                        $("#minutes").val("");
+                        $("#content").val("");
+
+						alert("已提交，稍后点击搜索进行内容查看");
+                        // 延迟5秒执行
+                        //intervalQuery = setInterval(function () {
+                        //    queryResultInfo();
+                        //}, 5000);
+                        
+                    }
+                });
+
+                console.log("serialNumber is " + serialNumber);
+            });
+			
+		    $("#btn-create").click(function() {
+				console.log ("=============================");
+				$("#form_div").show();
+		        $("#publish_div").hide();
+				console.log ("=============================");
+		    })
+
+		    $("#btn-publish").click(function() {
+		        console.log ("=============================");
+				$("#form_div").hide();
+		        $("#publish_div").show();
+				queryOutDateMessages();
+				console.log ("=============================");
+		    })			
+	        // 延迟5秒执行
+	        //intervalQuery2 = setInterval(function () {
+	        //    queryOutDateMessages();
+	        //}, 60000);
+
+	        // 根据交易流水号查询执行结果数据
+	        function queryOutDateMessages() {
+	        //$("#test").click(function () {
+	            var from = Account.NewAccount().getAddressString();
+	            var value = "0";   // 金额
+	            var nonce = "0";   // 交易序号
+	            var gas_price = "1000000" // 手续费价格
+	            var gas_limit = "2000000" // 手续费限制
+	            var callFunction = "readOutOfDateMessage";
+	            var callArgs = "[100, 0]"; //in the form of ["args"]
+	            var contract = { // 合约
+	                "function": callFunction,  // 方法名
+	                "args": callArgs            // 参数
+	            }
+
+	            // 使用api.call执行合约中的方法
+	            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
+					var str = resp.result;
+	                var ressultObj = JSON.parse(str.slice(1,-1).replace(/\\/g,""));
+					var publishStr = "<table class=\"table table-striped\">";
+					publishStr += "<td>姓名</td><td>死亡威胁留言</td><td>过期时间</td></tr>";
+	                for (var i = 0; i < ressultObj.length; i++){
+	                    var name = ressultObj[i].name;
+	                    var content = ressultObj[i].content;
+	                    var outDateUtcTime = new Date( parseInt(ressultObj[i].timestamp) );
+						var outDateLocaleTime = outDateUtcTime.toLocaleString();
+	                    publishStr += "<td>" + name + "</td><td>" + content + "</td><td>" + outDateLocaleTime + "</td></tr>";
+	                }
+					publishStr += "</table>";
+					$("#publish_div").html(publishStr);
+	            }).catch(function (err) {
+	                console.log("error:" + err.message);
+	            })
+	        };
+
         });
+
+
 
     </script>
 </head>
-<body style="margin:30px">
-    <form class="form-horizontal">
-        <div class="form-group">
-            <h1 class="col-md-2 col-md-offset-2">死亡威胁留言板</h1>
+<body>
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">死亡威胁留言板</h1>
+            <form class="form-inline" role="form">
+            <div class="form-group">
+            	<button type="button" class="btn btn-dark" id="btn-create">创建</button>
+            </div>
+            <div class="form-group">
+            <button type="button" class="btn btn-dark" id="btn-publish">公开内容</button>
+            </div>
+            <div class="form-group">
+            <h5 class="display-4">署名留言后会等到过期才会公布，也可以续期。</h5>
+            </div>
+            <form class="form-horizontal">
         </div>
+    </div>
+    <div class="container" id="content_div">    	
+		<div id="publish_div"></div>	
+    	<div id="form_div">
+		    <form class="form-horizontal">
+		        <div class="form-group">
+		            <label for="name">姓名：</label>
+		            <input type="text" class="form-control" id="name" placeholder="请输入姓名">
+		        </div>
+		        
+		        <div class="form-group">
+		            <label for="minutes">倒计时时间（分钟）：</label>
+		            <input type="text" class="form-control" id="minutes" placeholder="请输入时间（分钟）">
+		        </div>
+		        
+		        <div class="form-group">
+		            <label for="content">留言内容：</label>
+		            <textarea class="form-control" rows="5" id="content" placeholder="续时请置空"></textarea>
+		        </div>
 
-        <div class="form-group">
-            <label for="name" class="col-xs-2">姓名：</label>
-            <div class="col-xs-4">
-                <input type="text" class="form-control" id="name"
-                    placeholder="请输入姓名">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="timestamp" class="col-xs-2">倒计时时间（分钟）：</label>
-            <div class="col-xs-4">
-                <input type="text" class="form-control" id="minutes"
-                    placeholder="请输入时间（分钟）">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="content" class="col-xs-2">留言内容：</label>
-            <div class="col-xs-4">
-                <textarea class="form-control" rows="5" id="content"
-                   placeholder="续时请置空"></textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="content" class="col-xs-2">执行结果：</label>
-            <div class="col-xs-4">
-                <textarea class="form-control" rows="5" id="result"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-            <button class="btn btn-default" id="publish">
-                发布</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-            <button class="btn btn-default" id="test">
-                测试</button>
-            </div>
-        </div>
-
-        <div id="queryResult" style="height:200px;width:800px;border:1px solid #aaa">
-    </form>
+		        <div class="form-group">
+		            <button type="button" class="btn btn-dark" id="publish">发布</button>
+		        </div>
+		    </form>  
+	    </div>	
+    </div>
 </body>
 </html>
