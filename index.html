@@ -189,7 +189,9 @@
 		        
 		        <div class="form-group">
 		            <label for="minutes">倒计时时间（分钟）：</label>
-		            <input type="text" class="form-control" id="minutes" placeholder="请输入时间（分钟）">
+		            <input type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'')" 
+		                onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" 
+		                class="form-control" id="minutes" placeholder="请输入时间（分钟）">
 		        </div>
 		        
 		        <div class="form-group">
