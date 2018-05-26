@@ -243,7 +243,8 @@
 					var ipfsUrl = "None";
 					if (allOutdatedMessages[i].ipfsUrl.length > 0)
 						ipfsUrl = "https://ipfs.io/ipfs/" + allOutdatedMessages[i].ipfsUrl;
-                    publishStr += "<td>" + name + "</td><td>" + content + "</td><td>" + outDateLocaleTime + "</td><td>" + ipfsUrl + "</td></tr>";
+					var ipfsLink = "<a class=\"btn btn-default btn-xs\" href=\'javascript:window.open(\"" + ipfsUrl + "\", \"ipfs\")\'>IPFS</a>";
+                    publishStr += "<td>" + name + "</td><td>" + content + "</td><td>" + outDateLocaleTime + "</td><td>" + ipfsLink + "</td></tr>";
                 }
 				
 				publishStr += "</table>";
