@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Death Threat Message</title>
+    <title>Life Threat Message</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
     <link href="css/liMarquee.css" rel="stylesheet">    
@@ -111,7 +111,7 @@
 			var allMssagesNum = 0;
 		
 			queryAllMessagesNum();
-        	$("#banner").text("Wellcome to \"Death Threat Message\", please leave your message which will be published if it's outdated. All message number:");
+        	$("#banner").text("Wellcome to \"Life Threat Message\", please leave your message which will be published if it's outdated. All message number:");
         	$('.dowebok').liMarquee();
 
             $("#publish").click(function () {
@@ -268,7 +268,7 @@
 	            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
 					var num = resp.result;
 					allMssagesNum = num;
-	                $("#banner").text("Wellcome to \"Death Threat Message\", please leave your message which will be published if it's outdated. All message number:" + num);
+	                $("#banner").text("Wellcome to \"Life Threat Message\", please leave your message which will be published if it's outdated. All message number:" + num);
 					if (allMssagesNum % 10 == 0)
 					{
 						allPageNum = allMssagesNum / 10;
@@ -294,7 +294,7 @@
             <div class="form-group pull-right">
             	<button type="button" class="btn btn-dark" id="btn-switchLang">中文</button> 
             </div>        
-            <h1 class="display-4">Death Threat Message</h1>
+            <h1 class="display-4">Life Threat Message</h1>
 			<div class="form-group dowebok">
 				<h5 class="display-4" id="banner"></h5>
 			</div>     

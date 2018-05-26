@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>死亡威胁留言板</title>
+    <title>生命威胁留言板</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
     <link href="css/liMarquee.css" rel="stylesheet">    
@@ -113,7 +113,7 @@
 			var allMssagesNum = 0;
 		
 			queryAllMessagesNum();
-        	$("#banner").text("欢迎来到死亡威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:");
+        	$("#banner").text("欢迎来到生命威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:");
         	$('.dowebok').liMarquee();
 
             $("#publish").click(function () {
@@ -233,7 +233,7 @@
 
 			function showPage(offset, showLen) {
 				var publishStr = "<table class=\"table table-striped\">";
-				publishStr += "<td>姓名</td><td>死亡威胁留言</td><td>过期时间</td><td>IPFS链接</td></tr>";
+				publishStr += "<td>姓名</td><td>留言</td><td>过期时间</td><td>IPFS链接</td></tr>";
 						
 				for (var i = offset; i < showLen; i++){
                     var name = allOutdatedMessages[i].name;
@@ -270,7 +270,7 @@
 	            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
 					var num = resp.result;
 					allMssagesNum = num;
-	                $("#banner").text("欢迎来到死亡威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:" + num);
+	                $("#banner").text("欢迎来到生命威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:" + num);
 					if (allMssagesNum % 10 == 0)
 					{
 						allPageNum = allMssagesNum / 10;
@@ -296,7 +296,7 @@
             <div class="form-group pull-right">
             	<button type="button" class="btn btn-dark" id="btn-switchLang">English</button> 
             </div>        
-            <h1 class="display-4">死亡威胁留言板</h1>
+            <h1 class="display-4">生命威胁留言板</h1>
 			<div class="form-group dowebok">
 				<h5 class="display-4" id="banner"></h5>
 			</div>     
