@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>死亡威胁留言板</title>
+    <title>Death Threat Message</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
     <link href="css/liMarquee.css" rel="stylesheet">    
@@ -13,14 +13,12 @@
     <script src="libs/nebPay.js"></script>
 
     <script src="libs/buffer"></script>
-    <script src="libs/index.js"
+    <script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js"
     	integrity="sha384-5bXRcW9kyxxnSMbOoHzraqa7Z0PQWIao+cgeg327zit1hz5LZCEbIMx/LWKPReuB"
     	crossorigin="anonymous"></script>    
     <script>
         "use strict";
 
-		//<script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js"
-		
         // 合约地址
         //var dappAddress = "n1uK6Pgr7KTWeskLFYb4W8FA76xEXeHJRZh";//tesstnet
         //var dappAddress = "n1g9VuNxyaRvYdxP9VDYpSCqRQ79bE3AaoL";//mainnet 1.0
@@ -41,7 +39,7 @@
 
 	    if (typeof(webExtensionWallet) === "undefined") {
 	        $("#content_div").hide();
-	        alert("请安装星云链webExtensionWallet插件，https://github.com/ChengOrangeJu/WebExtensionWallet");
+	        alert("Please install webExtensionWallet plugin，https://github.com/ChengOrangeJu/WebExtensionWallet");
 	    } else {
 	        $("#content_div").show();
 	    }
@@ -66,7 +64,7 @@
                     $("#result").val(resp);
                     var respObject = JSON.parse(resp)
                     if(respObject.code === 0){
-                        alert(`已提交,如果需要续期，请及时回来更新！`);
+                        alert(`Submit successful!`);
                         clearInterval(intervalQuery);
                     }
                 })
@@ -93,7 +91,7 @@
                     $("#content").val("");
 					$("#uploadFile").val("");
 
-					alert("已提交,如果需要续期，请及时回来更新！");
+					alert("Submit successful!");
                     // 延迟5秒执行
                     //intervalQuery = setInterval(function () {
                     //    queryResultInfo();
@@ -113,7 +111,7 @@
 			var allMssagesNum = 0;
 		
 			queryAllMessagesNum();
-        	$("#banner").text("欢迎来到死亡威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:");
+        	$("#banner").text("Wellcome to \"Death Threat Message\", please leave your message which will be published if it's outdated. All message number:");
         	$('.dowebok').liMarquee();
 
             $("#publish").click(function () {
@@ -127,12 +125,12 @@
 				var fileurl = "";
 
                 if (name === "" || minutes === "") {
-                    alert("‘名称’或‘倒计时分钟’不能为空！");
+                    alert("'name' or 'outdate time' can't be null.");
                     return;
                 }
 
 				if(uploadFile.files[0] && uploadFile.files[0].size > 2*1024*1024){
-					alert('上传的文件大于2M,请重新选择');
+					alert('Upload file\'s size can\'t bigger that 2M, please choose another one.');
 		         	$('#uploadFile').val("");
 		         	return;
 				}
@@ -177,7 +175,7 @@
 		    })	
 
 		    $("#btn-switchLang").click(function() {
-				window.location.href="./index_en.html";
+				window.location.href="./index.html";
 		    })	
 				
 	        // 延迟5秒执行
@@ -233,7 +231,7 @@
 
 			function showPage(offset, showLen) {
 				var publishStr = "<table class=\"table table-striped\">";
-				publishStr += "<td>姓名</td><td>死亡威胁留言</td><td>过期时间</td><td>IPFS链接</td></tr>";
+					publishStr += "<td>Name</td><td>Message</td><td>Outdate Time</td><td>IPFS Link</td></tr>";
 						
 				for (var i = offset; i < showLen; i++){
                     var name = allOutdatedMessages[i].name;
@@ -247,8 +245,8 @@
                 }
 				
 				publishStr += "</table>";
-				publishStr += "<div class=\"form-group text-center\"><label id=\"prev\" class=\"layout\" onClick=\"showPrev()\">上一页__</label><label id=\"pageIndex\">" + nowPageIndex;
-				publishStr += "</lable><label id=\"next\" class=\"layout\" onClick=\"showNext()\">__下一页</label></div>";
+				publishStr += "<div class=\"form-group text-center\"><label id=\"prev\" class=\"layout\" onClick=\"showPrev()\">Prev__</label><label>" + nowPageIndex;
+				publishStr += "</lable><label id=\"next\" class=\"layout\" onClick=\"showNext()\">__Next</label></div>";
 				$("#publish_div").html(publishStr);				
 			}
 
@@ -270,7 +268,7 @@
 	            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
 					var num = resp.result;
 					allMssagesNum = num;
-	                $("#banner").text("欢迎来到死亡威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:" + num);
+	                $("#banner").text("Wellcome to \"Death Threat Message\", please leave your message which will be published if it's outdated. All message number:" + num);
 					if (allMssagesNum % 10 == 0)
 					{
 						allPageNum = allMssagesNum / 10;
@@ -294,18 +292,18 @@
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
             <div class="form-group pull-right">
-            	<button type="button" class="btn btn-dark" id="btn-switchLang">English</button> 
+            	<button type="button" class="btn btn-dark" id="btn-switchLang">中文</button> 
             </div>        
-            <h1 class="display-4">死亡威胁留言板</h1>
+            <h1 class="display-4">Death Threat Message</h1>
 			<div class="form-group dowebok">
 				<h5 class="display-4" id="banner"></h5>
 			</div>     
             <form class="form-inline" role="form">
             <div class="form-group">
-            	<button type="button" class="btn btn-dark" id="btn-create">创建</button>
+            	<button type="button" class="btn btn-dark" id="btn-create">Create</button>
             </div>
             <div class="form-group">
-            	<button type="button" class="btn btn-dark" id="btn-publish">公开内容</button>
+            <button type="button" class="btn btn-dark" id="btn-publish">Published</button>
             </div> 
         </div>
 
@@ -315,29 +313,29 @@
     	<div id="form_div">
 		    <form class="form-horizontal">
 		        <div class="form-group">
-		            <label for="name">姓名：</label>
-		            <input type="text" class="form-control" id="name" placeholder="请输入姓名">
+		            <label for="name">Name：</label>
+		            <input type="text" class="form-control" id="name" placeholder="Please input your name">
 		        </div>
 		        
 		        <div class="form-group">
-		            <label for="minutes">倒计时时间（分钟）：</label>
+		            <label for="minutes">Countdown(minutes):</label>
 		            <input type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'')" 
 		                onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" 
-		                class="form-control" id="minutes" placeholder="请输入时间（分钟）">
+		                class="form-control" id="minutes" placeholder="Please input countdown number.(minutes)">
 		        </div>
 		        
 		        <div class="form-group">
-		            <label for="content">留言内容：</label>
-		            <textarea class="form-control" rows="5" id="content" placeholder="续时请置空"></textarea>
+		            <label for="content">Message:</label>
+		            <textarea class="form-control" rows="5" id="content" placeholder="Please input nothing if your want to renew the message."></textarea>
 		        </div>
 
 		        <div class="form-group">
-		        	<label for="uploadFile">上传文件至IPFS：</label>
+		        	<label for="uploadFile">Upload file to IPFS Network：</label>
 		            <input type="file" class="file" data-show-preview="false" id="uploadFile" >
 		        </div>				
 
 		        <div class="form-group pull-right">
-		            <button type="button" class="btn btn-dark" id="publish">发布</button>
+		            <button type="button" class="btn btn-dark" id="publish">Submit</button>
 		        </div>
 		    </form>  
 	    </div>	
