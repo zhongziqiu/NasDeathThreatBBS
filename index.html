@@ -22,9 +22,10 @@
 		//<script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js"
 		
         // 合约地址
-        //var dappAddress = "n1uK6Pgr7KTWeskLFYb4W8FA76xEXeHJRZh";//tesstnet
+        //var dappAddress = "n22PZTbRmPt12fdrroEXN7TRiiJJdjum4Tm";//tesstnet
         //var dappAddress = "n1g9VuNxyaRvYdxP9VDYpSCqRQ79bE3AaoL";//mainnet 1.0
-        var dappAddress = "n1xEV6m2DXRobomH4xh3gqWt9L8S6jpvR77";//mainnet 2.0
+        //var dappAddress = "n1xEV6m2DXRobomH4xh3gqWt9L8S6jpvR77";//mainnet 2.0
+        var dappAddress = "n1rPujLtdn2XEMe54J7MpnhR3yWmZRDW55C";//mainnet 3.0
 
         // 直接访问星云链的api
         var nebulas = require("nebulas"),
@@ -52,57 +53,6 @@
         var intervalQuery;
         var intervalQuery2;
 
-
-		//<div class="form-group">
-        //    <label for="content">执行结果：</label>
-        //    <textarea class="form-control" rows="5" id="result"></textarea>
-        //</div>
-        
-        // 根据交易流水号查询执行结果数据
-        function queryResultInfo() {
-            nebPay.queryPayInfo(serialNumber)
-                .then(function (resp) {
-                   console.log("resp is " + resp);
-                    $("#result").val(resp);
-                    var respObject = JSON.parse(resp)
-                    if(respObject.code === 0){
-                        alert(`已提交,如果需要续期，请及时回来更新！`);
-                        clearInterval(intervalQuery);
-                    }
-                })
-                .catch(function (err) {
-                   console.log(err);
-                })
-        }
-
-		function saveToNet(name, content, timestamp, fileurl)
-		{
-	        var to = dappAddress;
-	        var value = "0";
-	        var callFunction = "save";
-	        var callArgs = "[\"" + name + "\",\"" + content + "\",\"" + timestamp + "\",\"" + fileurl + "\"]";
-
-            // 执行合约中的save方法
-			console.log("Ready to call the save function !!!");
-            serialNumber = nebPay.call(to, value, callFunction, callArgs, {
-                listener : function (resp) {
-                    console.log("resp is " + JSON.stringify(resp));
-                    // 清空信息
-                    $("#name").val("");
-                    $("#minutes").val("");
-                    $("#content").val("");
-					$("#uploadFile").val("");
-
-					alert("已提交,如果需要续期，请及时回来更新！");
-                    // 延迟5秒执行
-                    //intervalQuery = setInterval(function () {
-                    //    queryResultInfo();
-                    //}, 5000);
-                    
-                }
-            });
-		}
-
 		var showPrev;
 		var showNext;
 
@@ -115,6 +65,56 @@
 			queryAllMessagesNum();
         	$("#banner").text("欢迎来到生命威胁留言板，署名留言后会等到过期才会公布，也可以续期。当前留言人数为:");
         	$('.dowebok').liMarquee();
+
+			var options = {
+	            goods: {        //商品描述
+	                name: "example"
+	            },
+	            //callback 是交易查询服务器地址,
+	            //callback: NebPay.config.mainnetUrl //在主网查询(默认值)
+	            callback: NebPay.config.testnetUrl, //在测试网查询
+	            //listener: listener
+	        }
+	        
+	        // 根据交易流水号查询执行结果数据
+	        function queryResultInfo() {
+	            nebPay.queryPayInfo(serialNumber, options)
+	                .then(function (resp) {
+	                    var respObject = JSON.parse(resp)
+	                    if(respObject.code === 0){
+	                        clearInterval(intervalQuery);                    
+	                        alert(`已成功提交,如果需要续期，请及时回来更新！`);
+	                    }
+	                })
+	                .catch(function (err) {
+	                   console.log(err);
+	                })
+	        }
+
+			function saveToNet(name, content, timestamp, fileurl)
+			{
+		        var to = dappAddress;
+		        var value = "0";
+		        var callFunction = "save";
+		        var callArgs = "[\"" + name + "\",\"" + content + "\",\"" + timestamp + "\",\"" + fileurl + "\"]";
+
+	            // 执行合约中的save方法
+				console.log("Ready to call the save function !!!");
+	            serialNumber = nebPay.call(to, value, callFunction, callArgs, options);
+
+				// 清空信息
+				$("#name").val("");
+				$("#minutes").val("");
+				$("#content").val("");
+				$("#uploadFile").val("");
+				alert("请操作钱包发送交易，交易成功后有提示！");
+				
+				console.log ("serialNumber ==" + serialNumber);
+	            // 延迟10秒执行
+	            intervalQuery = setInterval(function () {
+	                queryResultInfo();
+	            }, 10000);			
+			}
 
             $("#publish").click(function () {
                 var name = $("#name").val().trim();
@@ -164,14 +164,28 @@
 				
                 console.log("serialNumber is " + serialNumber);
             });
+
+			//刚开始隐藏两个子版块
+	        $("#publish_div").hide();
+			$("#userOperation_div").hide();
 			
 		    $("#btn-create").click(function() {
-				$("#form_div").show();
 		        $("#publish_div").hide();
+				$("#userOperation_div").hide();
+				$("#form_div").show();
 		    })
 
-		    $("#btn-publish").click(function() {
+		    $("#btn-userOp").click(function() {
+		    	clearInterval(intervalQuery);
 				$("#form_div").hide();
+		        $("#publish_div").hide();
+				$("#userOperation_div").show();
+		    })
+				
+		    $("#btn-publish").click(function() {
+		    	clearInterval(intervalQuery);
+				$("#form_div").hide();
+				$("#userOperation_div").hide();
 		        $("#publish_div").show();
 				queryOutDateMessages();
 		    })	
@@ -179,6 +193,63 @@
 		    $("#btn-switchLang").click(function() {
 				window.location.href="./index_en.html";
 		    })	
+
+			$("#btn-queryMsg").click(function () {
+				var queryAddr = $("#netAddress").val().trim();
+                if (queryAddr === "") {
+                    alert("'地址不能为空'！");
+                    return;
+                }				
+				console.log("queryAddr ==" + queryAddr);
+			
+	            var from = Account.NewAccount().getAddressString();
+	            var value = "0";   // 金额
+	            var nonce = "0";   // 交易序号
+	            var gas_price = "1000000" // 手续费价格
+	            var gas_limit = "2000000" // 手续费限制
+	            var callFunction = "readOwnInfomation";
+	            var callArgs = "[\"" + queryAddr + "\"]"; //in the form of ["args"]
+	            var contract = { // 合约
+	                "function": callFunction,  // 方法名
+	                "args": callArgs            // 参数
+	            }
+
+				$("#queryResult_div").html("");
+	            // 使用api.call执行合约中的方法
+	            neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
+					var str = resp.result;
+	                var ressultObj = JSON.parse(str.slice(1,-1).replace(/\\/g,""));
+
+					if (ressultObj.ReVal == true) {
+						var publishStr = "<table class=\"table table-striped\">";
+						publishStr += "<td>姓名</td><td>留言</td><td>过期时间</td><td>IPFS链接</td></tr>";
+								
+	                    var name = ressultObj.info.name;
+	                    var content = ressultObj.info.content;
+	                    var outDateUtcTime = new Date( parseInt(ressultObj.info.timestamp) );
+						var outDateLocaleTime = outDateUtcTime.toLocaleString();
+						var ipfsUrl = "None";
+						var ipfsLink = "";
+						if (ressultObj.info.ipfsUrl.length > 0)
+						{
+							ipfsUrl = "https://ipfs.io/ipfs/" + ressultObj.info.ipfsUrl;
+							ipfsLink = "<a class=\"btn btn-default btn-xs\" href=\'javascript:window.open(\"" + ipfsUrl + "\", \"ipfs\")\'>IPFS</a>";
+						}
+						else
+						{
+							ipfsLink = ipfsUrl;
+						}
+	                    publishStr += "<td>" + name + "</td><td>" + content + "</td><td>" + outDateLocaleTime + "</td><td>" + ipfsLink + "</td></tr>";	
+						publishStr += "</table>";
+						$("#queryResult_div").html(publishStr);		
+					}
+					else {
+						alert('您的地址信息不存在！');
+					}
+	            }).catch(function (err) {
+	                console.log("error:" + err.message);
+	            })			
+			})
 				
 	        // 延迟5秒执行
 	        //intervalQuery2 = setInterval(function () {
@@ -241,9 +312,16 @@
                     var outDateUtcTime = new Date( parseInt(allOutdatedMessages[i].timestamp) );
 					var outDateLocaleTime = outDateUtcTime.toLocaleString();
 					var ipfsUrl = "None";
+					var ipfsLink = "";
 					if (allOutdatedMessages[i].ipfsUrl.length > 0)
+					{
 						ipfsUrl = "https://ipfs.io/ipfs/" + allOutdatedMessages[i].ipfsUrl;
-					var ipfsLink = "<a class=\"btn btn-default btn-xs\" href=\'javascript:window.open(\"" + ipfsUrl + "\", \"ipfs\")\'>IPFS</a>";
+						ipfsLink = "<a class=\"btn btn-default btn-xs\" href=\'javascript:window.open(\"" + ipfsUrl + "\", \"ipfs\")\'>IPFS</a>";
+					}
+					else
+					{
+						ipfsLink = ipfsUrl;
+					}
                     publishStr += "<td>" + name + "</td><td>" + content + "</td><td>" + outDateLocaleTime + "</td><td>" + ipfsLink + "</td></tr>";
                 }
 				
@@ -306,13 +384,28 @@
             	<button type="button" class="btn btn-dark" id="btn-create">创建</button>
             </div>
             <div class="form-group">
+            	<button type="button" class="btn btn-dark" id="btn-userOp">查询</button>
+            </div>            
+            <div class="form-group">
             	<button type="button" class="btn btn-dark" id="btn-publish">公开内容</button>
             </div> 
+            </form>
         </div>
 
     </div>
     <div class="container" id="content_div">    	
 		<div id="publish_div"></div>	
+		<div id="userOperation_div">
+            <form class="form-horizontal">
+            <div class="form-group">
+            	<label for="btn-queryMsg">请使用创建时候的星云地址进行查询：</label>
+            	<input type="text" class="form-control" id="netAddress" placeholder="请输入星云地址">
+            	<button type="button" class="btn btn-dark" id="btn-queryMsg">查询留言状态</button>
+            </div>
+            <div id="queryResult_div">
+            </div>             
+            </form> 		        
+		</div>
     	<div id="form_div">
 		    <form class="form-horizontal">
 		        <div class="form-group">
