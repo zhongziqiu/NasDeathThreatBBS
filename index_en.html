@@ -25,7 +25,7 @@
         //var dappAddress = "n22PZTbRmPt12fdrroEXN7TRiiJJdjum4Tm";//tesstnet
         //var dappAddress = "n1g9VuNxyaRvYdxP9VDYpSCqRQ79bE3AaoL";//mainnet 1.0
         //var dappAddress = "n1xEV6m2DXRobomH4xh3gqWt9L8S6jpvR77";//mainnet 2.0
-        var dappAddress = "n1rPujLtdn2XEMe54J7MpnhR3yWmZRDW55C";//mainnet 2.0
+        var dappAddress = "n1rPujLtdn2XEMe54J7MpnhR3yWmZRDW55C";//mainnet 3.0
 
         // 直接访问星云链的api
         var nebulas = require("nebulas"),
@@ -51,7 +51,32 @@
         var serialNumber;
         // 定时器
         var intervalQuery;
-        var intervalQuery2;
+
+		var options = {
+            goods: {        //商品描述
+                name: "example"
+            },
+            //callback 是交易查询服务器地址,
+            callback: NebPay.config.mainnetUrl //在主网查询(默认值)
+            //callback: NebPay.config.testnetUrl, //在测试网查询
+            //listener: listener
+        }
+        
+        // 根据交易流水号查询执行结果数据
+        function queryResultInfo() {
+            nebPay.queryPayInfo(serialNumber, options)
+                .then(function (resp) {
+                    var respObject = JSON.parse(resp);
+					console.log ("resp ===" + resp);
+                    if(respObject.code === 0){
+                        clearInterval(intervalQuery);                    
+                        alert(`Submit successful!`);
+                    }
+                })
+                .catch(function (err) {
+                   console.log(err);
+                })
+        }
 
 		var showPrev;
 		var showNext;
@@ -65,31 +90,6 @@
 			queryAllMessagesNum();
         	$("#banner").text("Wellcome to \"Life Threat Message\", please leave your message which will be published if it's outdated. All message number:");
         	$('.dowebok').liMarquee();
-
-			var options = {
-	            goods: {        //商品描述
-	                name: "example"
-	            },
-	            //callback 是交易查询服务器地址,
-	            //callback: NebPay.config.mainnetUrl //在主网查询(默认值)
-	            callback: NebPay.config.testnetUrl, //在测试网查询
-	            //listener: listener
-	        }
-	        
-	        // 根据交易流水号查询执行结果数据
-	        function queryResultInfo() {
-	            nebPay.queryPayInfo(serialNumber, options)
-	                .then(function (resp) {
-	                    var respObject = JSON.parse(resp)
-	                    if(respObject.code === 0){
-	                        clearInterval(intervalQuery);                    
-	                        alert(`Submit successful！`);
-	                    }
-	                })
-	                .catch(function (err) {
-	                   console.log(err);
-	                })
-	        }
 
 			function saveToNet(name, content, timestamp, fileurl)
 			{
@@ -110,10 +110,10 @@
 				alert("Please use your wallet to send the transaction!");
 				
 				console.log ("serialNumber ==" + serialNumber);
-	            // 延迟10秒执行
+	            // 延迟5秒执行
 	            intervalQuery = setInterval(function () {
 	                queryResultInfo();
-	            }, 10000);			
+	            }, 5000);			
 			}
 
             $("#publish").click(function () {
@@ -162,7 +162,6 @@
 					saveToNet(name, content, timestamp, fileurl);
 				}
 				
-                console.log("serialNumber is " + serialNumber);
             });
 
 			//刚开始隐藏两个子版块
@@ -250,11 +249,6 @@
 	                console.log("error:" + err.message);
 	            })			
 			})
-				
-	        // 延迟5秒执行
-	        //intervalQuery2 = setInterval(function () {
-	        //    queryOutDateMessages();
-	        //}, 60000);
 
 	        // 查询过期的留言
 	        function queryOutDateMessages() {
